@@ -43,7 +43,7 @@ export const patientRegister = catchAsyncError(async (req, res, next) => {
 
 export const login = catchAsyncError(async (req, res, next) => {
   const { email, password, confirmPassword, role } = req.body;
-  console.log(req.body);
+  // console.log(req.body);
 
   if (!email || !password || !confirmPassword || !role) {
     return next(new ErrorHandler("Fill all require details", 400));
@@ -175,4 +175,40 @@ export const getallDoctors = catchAsyncError(async (req, res, next) => {
     doctors,
     message: "List of all doctors!",
   });
+});
+
+export const getUserDetails = catchAsyncError(async (req, res, next) => {
+  const user = req.user;
+
+  res.status(200).json({
+    success: true,
+    user,
+    message: "User Information",
+  });
+});
+
+export const patientLogout = catchAsyncError(async (req, res, next) => {
+  res
+    .status(200)
+    .cookie("patienttoken", "", {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+    })
+    .json({
+      success: true,
+      message: "Patient Logout SuccesFully!",
+    });
+});
+
+export const adminLogout = catchAsyncError(async (req, res, next) => {
+  res
+    .status(200)
+    .cookie("admintoken", "", {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+    })
+    .json({
+      success: true,
+      message: "Admin Logout SuccesFully!",
+    });
 });
