@@ -1,4 +1,5 @@
 import express from "express";
+import cloudinary from "cloudinary";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { User } from "../models/userSchema.js";
 import { generateToken } from "../utils/jwtToken.js";
@@ -116,6 +117,16 @@ export const adminRegister = catchAsyncError(async (req, res, next) => {
 });
 
 export const addNewDoctor = catchAsyncError(async (req, res, next) => {
+  console.log(req.files);
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return next(new ErrorHandler("Doctor Avatar Required!", 400));
+  }
+  const { docAvatar } = req.files;
+  const allowedFormats = ["image/png", "image/jpeg", "image/webp"];
+  if (!allowedFormats.includes(docAvatar.mimetype)) {
+    return next(new ErrorHandler("File Format Not Supported!", 400));
+  }
+
   const {
     firstName,
     lastName,
@@ -137,7 +148,8 @@ export const addNewDoctor = catchAsyncError(async (req, res, next) => {
     !pincode ||
     !gender ||
     !password ||
-    !docDepartment
+    !docDepartment ||
+    !docAvatar
   ) {
     return next(new ErrorHandler("Provide ALL Details!", 400));
   }
@@ -145,6 +157,18 @@ export const addNewDoctor = catchAsyncError(async (req, res, next) => {
   const docRegistered = await User.findOne({ email });
   if (docRegistered) {
     return next(new ErrorHandler("Doctor with this email already exist!", 400));
+  }
+  const cloudinaryResponse = await cloudinary.uploader.upload(
+    docAvatar.tempFilePath
+  );
+  if (!cloudinaryResponse || cloudinaryResponse.error) {
+    console.error(
+      "Cloudinary Error:",
+      cloudinaryResponse.error || "Unknown Cloudinary error"
+    );
+    return next(
+      new ErrorHandler("Failed To Upload Doctor Avatar To Cloudinary", 500)
+    );
   }
 
   const doctor = await User.create({
@@ -158,6 +182,10 @@ export const addNewDoctor = catchAsyncError(async (req, res, next) => {
     password,
     role: "Doctor",
     docDepartment,
+    docAvatar: {
+      public_id: cloudinaryResponse.public_id,
+      url: cloudinaryResponse.secure_url,
+    },
   });
 
   res.status(201).json({

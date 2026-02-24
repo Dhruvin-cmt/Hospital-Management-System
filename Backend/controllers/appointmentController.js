@@ -21,7 +21,7 @@ export const postApplication = catchAsyncError(async (req, res, next) => {
     hasVisited,
   } = req.body;
 
-  //   console.log(req.body);
+  // console.log(req.body);
 
   if (
     !firstName ||
@@ -35,8 +35,7 @@ export const postApplication = catchAsyncError(async (req, res, next) => {
     !appointmentDate ||
     !doctor_firstName ||
     !doctor_lastName ||
-    !address ||
-    !hasVisited
+    !address 
   ) {
     return next(
       new ErrorHandler("Fill all required details of application!", 400)
@@ -50,7 +49,7 @@ export const postApplication = catchAsyncError(async (req, res, next) => {
     docDepartment: docDepartment,
   });
 
-  console.log(isConfict);
+  // console.log("first",isConfict);
 
   if (isConfict === 0) {
     return next(new ErrorHandler("Doctor not found!", 400));
@@ -66,6 +65,7 @@ export const postApplication = catchAsyncError(async (req, res, next) => {
   }
 
   const doctorId = isConfict[0]._id;
+  // console.log(doctorId)
   const patientId = req.user._id;
 
   const appointment = await Appointment.create({
@@ -107,23 +107,27 @@ export const getAllAppointments = catchAsyncError(async (req, res, next) => {
 
 export const updateAppointmentStatus = catchAsyncError(
   async (req, res, next) => {
-    const { id } = req.params
+    const { id } = req.params;
 
-    let appointment = await Appointment.findById(id)
-    if(!appointment) {
-        return next(new ErrorHandler("Appointment not found!", 400))
+    let appointment = await Appointment.findById(id);
+    if (!appointment) {
+      return next(new ErrorHandler("Appointment not found!", 400));
     }
 
-    appointment = await Appointment.findByIdAndUpdate(id, { status: req.body.status}, {
-        returnDocument: 'after',
-        runValidators: true
-    })
+    appointment = await Appointment.findByIdAndUpdate(
+      id,
+      { status: req.body.status },
+      {
+        returnDocument: "after",
+        runValidators: true,
+      }
+    );
 
     res.status(200).json({
-        success: true,
-        message: "Appointment Updated Succesfully!",
-        appointment        
-    })
+      success: true,
+      message: "Appointment Updated Succesfully!",
+      appointment,
+    });
   }
 );
 

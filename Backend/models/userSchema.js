@@ -55,6 +55,10 @@ const userSchema = new mongoose.Schema({
     require: true,
     enum: ["Admin", "Patient", "Doctor"],
   },
+  docAvatar : {
+    public_id : String,
+    url : String
+  }
 });
 
 userSchema.pre("save", async function (next) {
