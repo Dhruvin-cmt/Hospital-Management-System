@@ -7,6 +7,7 @@ import messageRouter from "./router/messageRouter.js";
 import userRouter from "./router/userRouter.js";
 import appointmentRouter from "./router/appointmentRouter.js";
 import fileUpload from "express-fileupload";
+import { errorMiddleware } from "./middlewares/error.js";
 
 const app = express();
 config({ path: "./config/.env" });
@@ -35,5 +36,7 @@ app.use("/api/user", userRouter);
 app.use("/api/appointment", appointmentRouter);
 
 dbConnection();
+
+app.use(errorMiddleware)
 
 export default app;
